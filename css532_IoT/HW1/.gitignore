@@ -2,3 +2,4 @@ Mac-Policy
 Mac.private.key
 Mac.public.key
 Mac.cert.pem
+root-CA.crt
