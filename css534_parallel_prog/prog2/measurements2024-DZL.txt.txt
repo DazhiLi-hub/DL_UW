@@ -1,0 +1,48 @@
+[dazhili@cssmpi8h prog2]$ mpirun -np 1 ./Wave2D_mpi 588 500 0 1
+Elapsed time = 4441465
+[dazhili@cssmpi8h prog2]$ mpirun -np 1 ./Wave2D_mpi 588 500 0 2
+Elapsed time = 2264569
+[dazhili@cssmpi8h prog2]$ mpirun -np 1 ./Wave2D_mpi 588 500 0 3
+Elapsed time = 2625437
+[dazhili@cssmpi8h prog2]$ mpirun -np 1 ./Wave2D_mpi 588 500 0 4
+Elapsed time = 1980625
+[dazhili@cssmpi8h prog2]$ mpirun -np 2 ./Wave2D_mpi 588 500 0 1
+Elapsed time = 3764311
+[dazhili@cssmpi8h prog2]$ mpirun -np 2 ./Wave2D_mpi 588 500 0 2
+Elapsed time = 2268837
+[dazhili@cssmpi8h prog2]$ mpirun -np 2 ./Wave2D_mpi 588 500 0 3
+Elapsed time = 2342703
+[dazhili@cssmpi8h prog2]$ mpirun -np 2 ./Wave2D_mpi 588 500 0 4
+Elapsed time = 1850588
+[dazhili@cssmpi8h prog2]$ mpirun -np 3 ./Wave2D_mpi 588 500 0 1
+Elapsed time = 2477224
+[dazhili@cssmpi8h prog2]$ mpirun -np 3 ./Wave2D_mpi 588 500 0 2
+Elapsed time = 1329938
+[dazhili@cssmpi8h prog2]$ mpirun -np 3 ./Wave2D_mpi 588 500 0 3
+Elapsed time = 1675712
+[dazhili@cssmpi8h prog2]$ mpirun -np 3 ./Wave2D_mpi 588 500 0 4
+Elapsed time = 1591142
+[dazhili@cssmpi8h prog2]$ mpirun -np 4 ./Wave2D_mpi 588 500 0 1
+Elapsed time = 1767212
+[dazhili@cssmpi8h prog2]$ mpirun -np 4 ./Wave2D_mpi 588 500 0 2
+Elapsed time = 1011387
+[dazhili@cssmpi8h prog2]$ mpirun -np 4 ./Wave2D_mpi 588 500 0 3
+Elapsed time = 1234077
+[dazhili@cssmpi8h prog2]$ mpirun -np 4 ./Wave2D_mpi 588 500 0 4
+Elapsed time = 1162246
+[dazhili@cssmpi8h prog2]$ mpirun -np 5 ./Wave2D_mpi 588 500 0 1
+Elapsed time = 1627654
+[dazhili@cssmpi8h prog2]$ mpirun -np 5 ./Wave2D_mpi 588 500 0 2
+Elapsed time = 1062102
+[dazhili@cssmpi8h prog2]$ mpirun -np 5 ./Wave2D_mpi 588 500 0 3
+Elapsed time = 1233757
+[dazhili@cssmpi8h prog2]$ mpirun -np 5 ./Wave2D_mpi 588 500 0 4
+Elapsed time = 893573
+[dazhili@cssmpi8h prog2]$ mpirun -np 6 ./Wave2D_mpi 588 500 0 1
+Elapsed time = 1515244
+[dazhili@cssmpi8h prog2]$ mpirun -np 6 ./Wave2D_mpi 588 500 0 2
+Elapsed time = 1019104
+[dazhili@cssmpi8h prog2]$ mpirun -np 6 ./Wave2D_mpi 588 500 0 3
+Elapsed time = 1104685
+[dazhili@cssmpi8h prog2]$ mpirun -np 6 ./Wave2D_mpi 588 500 0 4
+Elapsed time = 952633
