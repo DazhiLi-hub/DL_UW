@@ -1,21 +1,6 @@
 import boto3
 import uuid
 
-
-def send_msg():
-    sns = boto3.client('sns', region_name='us-east-1')
-
-    try:
-        # Send SMS message
-        response = sns.publish(
-            PhoneNumber='2066881358',
-            Message='You just created a new alarm'
-        )
-        print("Message sent! Message ID:", response['MessageId'])
-    except Exception as e:
-        print(f"Error sending message: {e}")
-
-
 class db_wrapper:
     def __init__(self):
         self.dynamoDB = boto3.resource('dynamodb')
@@ -68,5 +53,13 @@ class db_wrapper:
             )
             results.extend(response.get('Items', []))
 
+        return results
+
+    def query_30_behaviors(self):
+        table = self.dynamoDB.Table('BEHAVIORS')
+        response = table.scan(
+            Limit=30 # Limit the result to 30 records
+        )
+        results = response.get('Items', [])
         return results
 

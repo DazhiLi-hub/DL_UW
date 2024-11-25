@@ -1,8 +1,12 @@
+import json
+
 from flask_restful import Resource
 from flask import request
 from datetime import datetime
 
-from db_wrapper import db_wrapper, send_msg
+from db_wrapper import db_wrapper
+from mqtt_wrapper import mqtt_wrapper
+from time_schedule import time_schedule
 
 
 class AlarmSingleResource(Resource):
@@ -51,30 +55,41 @@ class AlarmListResource(Resource):
                 }
     """
     def post(self):
+        # parse request body
         payload = request.get_json()
+        wake_up_time = payload.get('time')
+        phone = payload.get('phone')
+        repeat = payload.get('repeat')
+        prefer_sleep_time = payload.get('prefer_sleep_time')
         # validation and set value
         try:
-            datetime.strptime(payload.get('time'), "%H:%M")
+            datetime.strptime(wake_up_time, "%H:%M")
         except ValueError:
             return {'message': 'Invalid time format. Please enter in HH:MM format.'}, 400
-        if not payload.get('phone') or len(str(payload.get('phone'))) != 10:
+        if not phone or len(str(phone)) != 10:
             return {'message': 'Invalid phone number. Please enter valid 10 digits US phone number.'}, 400
-        if payload.get('repeat') and payload.get('repeat') not in (True, False):
+        if repeat and repeat not in (True, False):
             return {'message': 'Invalid repeat type. Please enter True or False'}
-        if payload.get('prefer_sleep_time') and not isinstance(payload.get('prefer_sleep_time'), int):
+        if prefer_sleep_time and not isinstance(prefer_sleep_time, int):
             return {'message': 'Invalid prefer_sleep_time. Please enter a valid number'}
 
         # Database manipulation
         db = db_wrapper()
         db_result, db_id = db.insert_one_alarm(time= payload.get('time'),
-                            phone=payload.get('phone'),
-                            repeat= True if payload.get('repeat') else False,
-                            prefer_sleep_time=
-                            payload.get('prefer_sleep_time') if payload.get('prefer_sleep_time') else 7)
+                            phone=phone,
+                            repeat= True if repeat else False,
+                            prefer_sleep_time= prefer_sleep_time if prefer_sleep_time else 7)
+        if (db_result.get('ResponseMetadata').get('HTTPStatusCode') != 200):
+            return {'message': 'inserting database failed'}
 
-        send_msg()
+        # read user data and build time schedule
+        # user_behaviors = [{'REAL_TIME': '2024-11-17 00:20:00', 'IDEAL_TIME': '2024-11-17 00:00:00'}]
+        user_behaviors = db.query_30_behaviors()
+        schedule = time_schedule(user_behaviors, wake_up_time, prefer_sleep_time)
 
-        if (db_result.get('ResponseMetadata').get('HTTPStatusCode') == 200):
-            return {'message': 'alarm created. ID = ' + db_id}, 200
-        else:
-            return  {'message': 'inserting database failed'}
+        #sending time schedule to the IoT core
+        mqtt = mqtt_wrapper()
+        mqtt.publish_msg(json.dumps(schedule.to_dict()))
+
+
+        return {'message': 'alarm created. ID = ' + db_id}, 200
