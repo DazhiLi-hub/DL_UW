@@ -23,6 +23,8 @@ def listen_on_bed_time(sleep_at_time):
         if (db_result.get('ResponseMetadata').get('HTTPStatusCode') != 200):
             print("[ERROR] Inserting user behavior failed, please check. ")
             print("[ERROR] db response: " + db_result)
+        else:
+            print("[INFO] User behavior uploaded database successfully")
         stop_event.set()
 
     return

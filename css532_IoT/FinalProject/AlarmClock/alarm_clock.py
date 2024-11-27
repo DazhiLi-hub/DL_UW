@@ -13,17 +13,19 @@ def alarm(wake_up_time):
     button = Button(3)
     # buzzer at GPIO17
     buzzer = Buzzer(17)
+    print("[INFO] Alarm starts")
     while not stop_event.is_set():
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print("Current time:", current_time)
 
         # Check if the current time matches the alarm time
         if current_time == wake_up_time:
-            print("Time to wake up!")
+            print("[INFO] Time to wake up!")
             #buzzer sound and wait the button to be pressed
             buzzer.beep()
-            button.wait_for_press()
-            buzzer.off()
-            print("Alarm stopped")
-            stop_event.set()
+            while True:
+                if button.is_pressed:
+                    buzzer.off()
+                    print("[INFO] Alarm stopped")
+                    stop_event.set()
+                    break
         time.sleep(1)  # Check the time every 1 seconds
