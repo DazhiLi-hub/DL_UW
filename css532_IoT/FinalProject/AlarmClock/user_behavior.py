@@ -10,6 +10,7 @@ stop_event = threading.Event()
 def listen_on_bed_time(sleep_at_time):
     stop_event.clear()
     button = Button(2)
+    print("[INFO] user behavior collecting starts")
     while not stop_event.is_set():
         button.wait_for_press()
         # if button pressed but the schedule is canceled, just return
@@ -26,5 +27,4 @@ def listen_on_bed_time(sleep_at_time):
         else:
             print("[INFO] User behavior uploaded database successfully")
         stop_event.set()
-
     return

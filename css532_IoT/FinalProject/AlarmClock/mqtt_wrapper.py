@@ -71,7 +71,8 @@ def on_time_schedule_received(topic, payload, dup, qos, retain, **kwargs):
 
 
     # sending sleep message thread
-    msg_thread = threading.Thread(target=msg_sender.send_message, kwargs={'msg_notify_time': msg_notify_time})
+    msg_thread = threading.Thread(target=msg_sender.send_message, kwargs={'msg_notify_time': msg_notify_time,
+                                                                          'sleep_at_time': sleep_at_time})
 
     # recording user's behavior thread
     usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, kwargs={'sleep_at_time': sleep_at_time})
