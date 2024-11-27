@@ -1,4 +1,5 @@
 import threading
+import json
 
 from awscrt import mqtt
 from awsiot import mqtt_connection_builder
@@ -60,16 +61,23 @@ def on_connection_closed(connection, callback_data):
 
 # Callback when the subscribed topic receives a message
 def on_time_schedule_received(topic, payload, dup, qos, retain, **kwargs):
-    #parsing payload
+    #parsing payload; eg. "2024-11-27 08:20:00" (time format, type = str)
+    time_schedule = json.loads(payload.decode('utf-8'))
+    wake_up_time = time_schedule.get('wake_up_time')
+    sleep_at_time = time_schedule.get('sleep_at_time')
+    msg_notify_time = time_schedule.get('msg_notify_time')
+
+    print(wake_up_time)
+
 
     # sending sleep message thread
-    msg_thread = threading.Thread(target=msg_sender.send_message, args=())
+    msg_thread = threading.Thread(target=msg_sender.send_message, kwargs={'msg_notify_time': msg_notify_time})
 
     # recording user's behavior thread
-    usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, args=())
+    usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, kwargs={'sleep_at_time': sleep_at_time})
 
     # alarming wakeup thread
-    alarm_thread = threading.Thread(target=alarm_clock.alarm, args=())
+    alarm_thread = threading.Thread(target=alarm_clock.alarm, kwargs={'wake_up_time': wake_up_time})
 
     msg_thread.start()
     usr_thread.start()
