@@ -66,8 +66,8 @@ class AlarmListResource(Resource):
             datetime.strptime(wake_up_time, "%H:%M")
         except ValueError:
             return {'message': 'Invalid time format. Please enter in HH:MM format.'}, 400
-        if not phone or len(str(phone)) != 10:
-            return {'message': 'Invalid phone number. Please enter valid 10 digits US phone number.'}, 400
+        if not phone or len(str(phone)) != 12 or phone.startswith("+1"):
+            return {'message': 'Invalid phone number. Please enter valid 10 digits US phone number begin with +1.'}, 400
         if repeat and repeat not in (True, False):
             return {'message': 'Invalid repeat type. Please enter True or False'}
         if prefer_sleep_time and not isinstance(prefer_sleep_time, int):
@@ -89,7 +89,9 @@ class AlarmListResource(Resource):
 
         #sending time schedule to the IoT core
         mqtt = mqtt_wrapper()
-        mqtt.publish_msg(json.dumps(schedule.to_dict()))
+        msg_payload = schedule.to_dict()
+        msg_payload["to_phone_number"] = phone
+        mqtt.publish_msg(json.dumps(msg_payload))
 
 
         return {'message': 'alarm created. ID = ' + db_id}, 200
