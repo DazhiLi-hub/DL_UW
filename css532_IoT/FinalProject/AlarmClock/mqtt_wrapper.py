@@ -66,16 +66,19 @@ def on_time_schedule_received(topic, payload, dup, qos, retain, **kwargs):
     wake_up_time = time_schedule.get('wake_up_time')
     sleep_at_time = time_schedule.get('sleep_at_time')
     msg_notify_time = time_schedule.get('msg_notify_time')
+    to_phone_number = time_schedule.get('to_phone_number')
 
     print(wake_up_time)
 
 
     # sending sleep message thread
     msg_thread = threading.Thread(target=msg_sender.send_message, kwargs={'msg_notify_time': msg_notify_time,
-                                                                          'sleep_at_time': sleep_at_time})
+                                                                          'sleep_at_time': sleep_at_time,
+                                                                          'to_phone_number': to_phone_number})
 
     # recording user's behavior thread
-    usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, kwargs={'sleep_at_time': sleep_at_time})
+    usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, kwargs={'sleep_at_time': sleep_at_time,
+                                                                                   'to_phone_number': to_phone_number})
 
     # alarming wakeup thread
     alarm_thread = threading.Thread(target=alarm_clock.alarm, kwargs={'wake_up_time': wake_up_time})

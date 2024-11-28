@@ -6,7 +6,7 @@ from twilio.rest import Client
 
 stop_event = threading.Event()
 
-def send_message(msg_notify_time, sleep_at_time):
+def send_message(msg_notify_time, sleep_at_time, to_phone_number):
     stop_event.clear()
     print("[INFO] msg notification starts")
     while not stop_event.is_set():
@@ -15,7 +15,7 @@ def send_message(msg_notify_time, sleep_at_time):
         # Check if the current time matches the msg_notify_time
         if current_time == msg_notify_time:
             print("[INFO] Time to wake up!")
-            send_sms("+12066881358", get_message_body(sleep_at_time))
+            send_sms(to_phone_number, get_message_body(sleep_at_time))
             stop_event.set()
         time.sleep(1)  # Check the time every 1 seconds
 
