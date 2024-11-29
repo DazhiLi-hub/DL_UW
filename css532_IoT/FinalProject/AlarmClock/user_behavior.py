@@ -1,4 +1,3 @@
-import threading
 import time
 from datetime import datetime, timedelta
 
@@ -7,11 +6,8 @@ from gpiozero import Button
 import msg_sender
 from db_wrapper import db_wrapper
 
-stop_event = threading.Event()
-
-def listen_on_bed_time(sleep_at_time, to_phone_number):
-    # release signals for work
-    stop_event.clear()
+def listen_on_bed_time(sleep_at_time, to_phone_number, stop_event):
+    print("[INFO] user behavior collecting starts")
     # assign button
     button = Button(2)
     # notification config
@@ -19,7 +15,6 @@ def listen_on_bed_time(sleep_at_time, to_phone_number):
     max_notify_times = 5
     notify_times_count = 0
     sleep_at_time_datetime = datetime.strptime(sleep_at_time, "%Y-%m-%d %H:%M:%S")
-    print("[INFO] user behavior collecting starts")
     while not stop_event.is_set():
         # check if uses is not in bed after sleep_at_time, send notification every x interval minutes
         current_time = datetime.now()

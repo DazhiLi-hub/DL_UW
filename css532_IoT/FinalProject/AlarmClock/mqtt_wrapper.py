@@ -16,8 +16,44 @@ CA_FILE = './root-CA.crt'
 CLIENT_ID = "Alarm Clock"
 RECV_TIME_SCHEDULE_TOPIC = 'system/time_schedule'
 RECV_CANCEL_SCHEDULE_TOPIC = 'system/cancel_schedule'
-TIME_SCHEDULE_EVENT = threading.Event()
-CANCEL_SCHEDULE_EVENT = threading.Event()
+
+MSG_THREADS = {}
+USER_THREADS = {}
+ALARM_THREADS = {}
+
+def cancel_schedule_by_id(id):
+    if id in MSG_THREADS:
+        msg_thread, msg_stop_event = MSG_THREADS[id]
+        usr_thread, usr_stop_event = USER_THREADS[id]
+        alarm_thread, alarm_stop_event = ALARM_THREADS[id]
+        if not msg_stop_event.is_set():
+            msg_stop_event.set()
+            msg_thread.join()
+            print(f"[INFO] Message notification thread {id} has been canceled.")
+        if not usr_stop_event.is_set():
+            usr_stop_event.set()
+            usr_thread.join()
+            print(f"[INFO] User behaviors collecting thread {id} has been canceled.")
+        if not alarm_stop_event.is_set():
+            alarm_stop_event.set()
+            alarm_thread.join()
+            print(f"[INFO] Alarming thread {id} has been canceled.")
+    else:
+        print(f"[WARN] Thread {id} not found.")
+
+def clean_all_threads():
+    for thread, stop_event in MSG_THREADS.items():
+        if not stop_event.is_set():
+            stop_event.set()
+            thread.join()
+    for thread, stop_event in USER_THREADS.items():
+        if not stop_event.is_set():
+            stop_event.set()
+            thread.join()
+    for thread, stop_event in ALARM_THREADS.items():
+        if not stop_event.is_set():
+            stop_event.set()
+            thread.join()
 
 # Callback when connection is accidentally lost.
 def on_connection_interrupted(connection, error, **kwargs):
@@ -67,37 +103,39 @@ def on_time_schedule_received(topic, payload, dup, qos, retain, **kwargs):
     sleep_at_time = time_schedule.get('sleep_at_time')
     msg_notify_time = time_schedule.get('msg_notify_time')
     to_phone_number = time_schedule.get('to_phone_number')
-
-    print(wake_up_time)
+    id = time_schedule.get('id')
+    print('[INFO] id=' + id + ' schedule received')
 
 
     # sending sleep message thread
+    msg_thread_stop_event = threading.Event()
     msg_thread = threading.Thread(target=msg_sender.send_message, kwargs={'msg_notify_time': msg_notify_time,
                                                                           'sleep_at_time': sleep_at_time,
-                                                                          'to_phone_number': to_phone_number})
+                                                                          'to_phone_number': to_phone_number,
+                                                                          'stop_event': msg_thread_stop_event})
+    MSG_THREADS[id] = (msg_thread, msg_thread_stop_event)
 
     # recording user's behavior thread
+    usr_thread_stop_event = threading.Event()
     usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, kwargs={'sleep_at_time': sleep_at_time,
-                                                                                   'to_phone_number': to_phone_number})
+                                                                                   'to_phone_number': to_phone_number,
+                                                                                   'stop_event': usr_thread_stop_event})
+    USER_THREADS[id] = (usr_thread, usr_thread_stop_event)
 
     # alarming wakeup thread
-    alarm_thread = threading.Thread(target=alarm_clock.alarm, kwargs={'wake_up_time': wake_up_time})
+    alarm_thread_stop_event = threading.Event()
+    alarm_thread = threading.Thread(target=alarm_clock.alarm, kwargs={'wake_up_time': wake_up_time,
+                                                                      'stop_event': alarm_thread_stop_event})
+    ALARM_THREADS[id] = (alarm_thread, alarm_thread_stop_event)
 
     msg_thread.start()
     usr_thread.start()
     alarm_thread.start()
 
-    TIME_SCHEDULE_EVENT.set()
-
 def on_schedule_cancel_received(topic, payload, dup, qos, retain, **kwargs):
-    # cancel msg_thread
-    msg_sender.stop_event.set()
-    # cancel user behavior recording thread
-    user_behavior.stop_event.set()
-    # cancel wake up thread
-    alarm_clock.stop_event.set()
-
-    CANCEL_SCHEDULE_EVENT.set()
+    cancel_schedule = json.loads(payload.decode('utf-8'))
+    id = cancel_schedule.get('id')
+    cancel_schedule_by_id(id)
 
 class mqtt_wrapper:
     def __init__(self):
@@ -115,54 +153,40 @@ class mqtt_wrapper:
         on_connection_failure=on_connection_failure,
         on_connection_closed=on_connection_closed)
 
-    def receive_time_schedule_msg(self):
-        TIME_SCHEDULE_EVENT.clear()
-
         connect_future = self.mqtt_connection.connect()
         # Future.result() waits until a result is available
         connect_future.result()
-        print("Connected!")
+        print("\n[INFO] MQTT Connected successfully!")
 
+    def receive_time_schedule_msg(self, stop_event):
         # Subscribe
-        print("Subscribing to topic '{}'...".format(RECV_TIME_SCHEDULE_TOPIC))
+        print("[INFO] Subscribing to topic '{}'...".format(RECV_TIME_SCHEDULE_TOPIC))
         subscribe_future, packet_id = self.mqtt_connection.subscribe(
             topic=RECV_TIME_SCHEDULE_TOPIC,
             qos=mqtt.QoS.AT_LEAST_ONCE,
             callback=on_time_schedule_received)
 
         subscribe_result = subscribe_future.result()
-        print("Subscribed with {}".format(str(subscribe_result['qos'])))
+        print("[INFO] Subscribed with {}".format(str(subscribe_result['qos'])))
 
-        TIME_SCHEDULE_EVENT.wait()
+        stop_event.wait()
 
-        # Disconnect
-        print("Disconnecting...")
-        disconnect_future = self.mqtt_connection.disconnect()
-        disconnect_future.result()
-        print("Disconnected!")
-
-    def receive_cancel_schedule_msg(self):
-        CANCEL_SCHEDULE_EVENT.clear()
-
-        connect_future = self.mqtt_connection.connect()
-        # Future.result() waits until a result is available
-        connect_future.result()
-        print("Connected!")
-
+    def receive_cancel_schedule_msg(self, stop_event):
         # Subscribe
-        print("Subscribing to topic '{}'...".format(RECV_CANCEL_SCHEDULE_TOPIC))
+        print("[INFO] Subscribing to topic '{}'...".format(RECV_CANCEL_SCHEDULE_TOPIC))
         subscribe_future, packet_id = self.mqtt_connection.subscribe(
             topic=RECV_CANCEL_SCHEDULE_TOPIC,
             qos=mqtt.QoS.AT_LEAST_ONCE,
             callback=on_schedule_cancel_received)
 
         subscribe_result = subscribe_future.result()
-        print("Subscribed with {}".format(str(subscribe_result['qos'])))
+        print("[INFO] Subscribed with {}".format(str(subscribe_result['qos'])))
 
-        CANCEL_SCHEDULE_EVENT.wait()
+        stop_event.wait()
 
+    def disconnect(self):
         # Disconnect
-        print("Disconnecting...")
+        print("[INFO] Disconnecting...")
         disconnect_future = self.mqtt_connection.disconnect()
         disconnect_future.result()
-        print("Disconnected!")
+        print("[INFO] Disconnected!")

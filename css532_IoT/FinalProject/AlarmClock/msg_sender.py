@@ -1,14 +1,16 @@
 import os
-import threading
 import time
 from datetime import datetime
 from twilio.rest import Client
 
-stop_event = threading.Event()
-
-def send_message(msg_notify_time, sleep_at_time, to_phone_number):
-    stop_event.clear()
+def send_message(msg_notify_time, sleep_at_time, to_phone_number, stop_event):
     print("[INFO] msg notification starts")
+    current_time = datetime.now()
+    if current_time > datetime.strptime(msg_notify_time, "%Y-%m-%d %H:%M:%S"):
+        print("[WARN] current time exceed the message notification time")
+        print("[WARN] message notification exits")
+        stop_event.set()
+        return
     while not stop_event.is_set():
         current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
