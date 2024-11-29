@@ -4,7 +4,7 @@ from gpiozero import Button
 from gpiozero import Buzzer
 
 def alarm(wake_up_time, stop_event):
-    print("[INFO] Alarm starts")
+    print("[INFO] alarm starts")
     # stop alarming button at GPIO3
     button = Button(3)
     # buzzer at GPIO17

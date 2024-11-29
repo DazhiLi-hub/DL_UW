@@ -16,7 +16,6 @@ def send_message(msg_notify_time, sleep_at_time, to_phone_number, stop_event):
 
         # Check if the current time matches the msg_notify_time
         if current_time == msg_notify_time:
-            print("[INFO] Time to wake up!")
             send_sms(to_phone_number, get_message_body(sleep_at_time))
             stop_event.set()
         time.sleep(1)  # Check the time every 1 seconds
@@ -44,5 +43,5 @@ def send_sms(to_phone_number, message):
 def get_message_body(sleep_at_time):
     return ("Time to prepare for sleep, take a shower first\n" +
             "Please sleep at " + sleep_at_time + "\n" +
-            "Wish you a good nigh\n" +
+            "Wish you a good night\n" +
             "AlarmClockService")
