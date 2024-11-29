@@ -42,15 +42,15 @@ def cancel_schedule_by_id(id):
         print(f"[WARN] Thread {id} not found.")
 
 def clean_all_threads():
-    for thread, stop_event in MSG_THREADS.items():
+    for thread, stop_event in MSG_THREADS.values():
         if not stop_event.is_set():
             stop_event.set()
             thread.join()
-    for thread, stop_event in USER_THREADS.items():
+    for thread, stop_event in USER_THREADS.values():
         if not stop_event.is_set():
             stop_event.set()
             thread.join()
-    for thread, stop_event in ALARM_THREADS.items():
+    for thread, stop_event in ALARM_THREADS.values():
         if not stop_event.is_set():
             stop_event.set()
             thread.join()
