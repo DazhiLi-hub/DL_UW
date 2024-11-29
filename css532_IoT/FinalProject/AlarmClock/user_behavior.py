@@ -19,7 +19,7 @@ def listen_on_bed_time(sleep_at_time, to_phone_number, stop_event):
         target_time = datetime.strftime(datetime.now() - timedelta(minutes=msg_time_interval),
                                         "%Y-%m-%d %H:%M:%S")
         if target_time == sleep_at_time and notify_times_count < max_notify_times:
-            msg_sender.send_sms(to_phone_number, str(msg_time_interval) + " past preset sleep time, hurry up")
+            msg_sender.send_sms(to_phone_number, str(msg_time_interval) + " minutes past preset sleep time, hurry up")
             msg_time_interval+=msg_time_interval
             notify_times_count += 1
 
