@@ -8,18 +8,11 @@ class time_schedule:
     Time schedule builder based on user_behaviors, preset wakeup time, sleep period length
     """
     def __init__(self, user_behaviors, wake_up_time, prefer_sleep_time):
-        # calculating wake up time
-        now = datetime.now()
-        target_time = now.replace(hour=int(wake_up_time.split(':')[0]),
-                                  minute=int(wake_up_time.split(':')[1]),
-                                  second=0, microsecond=0)
-        if now > target_time:
-            target_time += timedelta(days=1)
-        self.wake_up_time = target_time
+        self.wake_up_time = wake_up_time
 
         # calculating sleep time
         prefer_sleep_time = prefer_sleep_time if prefer_sleep_time else 7
-        self.sleep_at_time = target_time - timedelta(hours=prefer_sleep_time)
+        self.sleep_at_time = wake_up_time - timedelta(hours=prefer_sleep_time)
 
         # calculating message notification time
         time_shift = 3600

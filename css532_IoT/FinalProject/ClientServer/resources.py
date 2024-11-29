@@ -2,7 +2,7 @@ import json
 
 from flask_restful import Resource
 from flask import request
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from db_wrapper import db_wrapper
 from mqtt_wrapper import mqtt_wrapper
@@ -48,10 +48,9 @@ class AlarmListResource(Resource):
                 Create an alarm clock by posting a form of info
                 ReqBody:
                 {
-                    "time": "HH:MM"(required)
-                    "phone": "732-890-1811" (required)
-                    "repeat": True(optional)
-                    "prefer_sleep_time": "7" (optional)
+                    "time": "8:20",
+                    "phone": "+12067329811",
+                    "prefer_sleep_time": 8
                 }
     """
     def post(self):
@@ -59,26 +58,36 @@ class AlarmListResource(Resource):
         payload = request.get_json()
         wake_up_time = payload.get('time')
         phone = payload.get('phone')
-        repeat = payload.get('repeat')
         prefer_sleep_time = payload.get('prefer_sleep_time')
         # validation and set value
         try:
             datetime.strptime(wake_up_time, "%H:%M")
         except ValueError:
             return {'message': 'Invalid time format. Please enter in HH:MM format.'}, 400
-        if not phone or len(str(phone)) != 12 or phone.startswith("+1"):
+        if not phone or len(phone) != 12 or not phone.startswith("+1"):
             return {'message': 'Invalid phone number. Please enter valid 10 digits US phone number begin with +1.'}, 400
-        if repeat and repeat not in (True, False):
-            return {'message': 'Invalid repeat type. Please enter True or False'}
         if prefer_sleep_time and not isinstance(prefer_sleep_time, int):
             return {'message': 'Invalid prefer_sleep_time. Please enter a valid number'}
 
+        # transforming wake up time to exact datetime
+        now = datetime.now()
+        target_time = now.replace(hour=int(wake_up_time.split(':')[0]),
+                                  minute=int(wake_up_time.split(':')[1]),
+                                  second=0, microsecond=0)
+        if now > target_time:
+            target_time += timedelta(days=1)
+        wake_up_time = target_time
+
         # Database manipulation
         db = db_wrapper()
-        db_result, db_id = db.insert_one_alarm(time= payload.get('time'),
-                            phone=phone,
-                            repeat= True if repeat else False,
-                            prefer_sleep_time= prefer_sleep_time if prefer_sleep_time else 7)
+
+        # check target date has a schedule, currently supports only one schedule for a day
+
+        # inserting data into db
+        db_result, db_id = db.insert_one_alarm(date= wake_up_time.date().strftime("%Y-%m-%d"),
+                                               time= wake_up_time.time().strftime("%H:%M:%S"),
+                                               phone=phone,
+                                               prefer_sleep_time= prefer_sleep_time if prefer_sleep_time else 7)
         if (db_result.get('ResponseMetadata').get('HTTPStatusCode') != 200):
             return {'message': 'inserting database failed'}
 
@@ -91,6 +100,7 @@ class AlarmListResource(Resource):
         mqtt = mqtt_wrapper()
         msg_payload = schedule.to_dict()
         msg_payload["to_phone_number"] = phone
+        msg_payload["id"] = db_id
         mqtt.publish_msg(json.dumps(msg_payload))
 
 

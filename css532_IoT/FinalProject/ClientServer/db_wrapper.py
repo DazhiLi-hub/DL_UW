@@ -5,7 +5,7 @@ class db_wrapper:
     def __init__(self):
         self.dynamoDB = boto3.resource('dynamodb')
 
-    def insert_one_alarm(self, time, phone, repeat, prefer_sleep_time):
+    def insert_one_alarm(self, date, time, phone, prefer_sleep_time):
         table = self.dynamoDB.Table('ALARMS')
         id = str(uuid.uuid4())
 
@@ -13,9 +13,9 @@ class db_wrapper:
         response = table.put_item(
             Item={
                 'ID': id,
+                'DATE': date,
                 'TIME': time,
                 'PHONE': phone,
-                'REPEAT': repeat,
                 'PREFER_SLEEP_TIME': prefer_sleep_time
             }
         )
