@@ -8,6 +8,8 @@ from db_wrapper import db_wrapper
 from mqtt_wrapper import mqtt_wrapper
 from time_schedule import time_schedule
 
+TIME_SCHEDULE_TOPIC = 'system/time_schedule'
+CANCEL_SCHEDULE_TOPIC = 'system/cancel_schedule'
 
 class AlarmSingleResource(Resource):
 
@@ -32,7 +34,7 @@ class AlarmSingleResource(Resource):
         db = db_wrapper()
         db.delete_one_alarm(alarm_id)
         mqtt = mqtt_wrapper()
-        mqtt.publish_msg(json.dumps({'id': alarm_id}))
+        mqtt.publish_msg(CANCEL_SCHEDULE_TOPIC, json.dumps({'id': alarm_id}))
         return {'message': 'id=' + alarm_id + ' is deleted successfully'}, 200
 
 
@@ -103,7 +105,7 @@ class AlarmListResource(Resource):
         msg_payload = schedule.to_dict()
         msg_payload["to_phone_number"] = phone
         msg_payload["id"] = db_id
-        mqtt.publish_msg(json.dumps(msg_payload))
+        mqtt.publish_msg(TIME_SCHEDULE_TOPIC, json.dumps(msg_payload))
 
 
         return {'message': 'alarm created. ID = ' + db_id}, 200

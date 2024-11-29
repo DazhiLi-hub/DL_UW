@@ -7,7 +7,6 @@ CERT_FILE = './client_server.cert.pem'
 PRIVATE_KEY = './client_server.private.key'
 CA_FILE = './root-CA.crt'
 CLIENT_ID = "Client Server"
-SEND_MESSAGE_TOPIC = 'system/time_schedule'
 
 # Callback when connection is accidentally lost.
 def on_connection_interrupted(connection, error, **kwargs):
@@ -65,14 +64,14 @@ class mqtt_wrapper:
         on_connection_failure=on_connection_failure,
         on_connection_closed=on_connection_closed)
 
-    def publish_msg(self, message_json):
+    def publish_msg(self, topic, message_json):
         connect_future = self.mqtt_connection.connect()
         # Future.result() waits until a result is available
         connect_future.result()
         print("Connected!")
 
         self.mqtt_connection.publish(
-            topic=SEND_MESSAGE_TOPIC,
+            topic=topic,
             payload=message_json,
             qos=mqtt.QoS.AT_LEAST_ONCE)
 
