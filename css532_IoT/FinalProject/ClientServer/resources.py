@@ -31,6 +31,8 @@ class AlarmSingleResource(Resource):
     def delete(self, alarm_id):
         db = db_wrapper()
         db.delete_one_alarm(alarm_id)
+        mqtt = mqtt_wrapper()
+        mqtt.publish_msg(json.dumps({'id': alarm_id}))
         return {'message': 'id=' + alarm_id + ' is deleted successfully'}, 200
 
 
