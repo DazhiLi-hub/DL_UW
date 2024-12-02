@@ -6,7 +6,7 @@ from gpiozero import Button
 import msg_sender
 from db_wrapper import db_wrapper
 
-def listen_on_bed_time(sleep_at_time, to_phone_number, stop_event):
+def listen_on_bed_time(sleep_at_time, msg_notify_time, to_phone_number, stop_event):
     print("[INFO] user behavior collecting starts")
     # assign button
     button = Button(2)
@@ -29,7 +29,7 @@ def listen_on_bed_time(sleep_at_time, to_phone_number, stop_event):
         if button.is_pressed:
             # recording user data to database
             db = db_wrapper()
-            db_result = db.insert_one_behavior(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), sleep_at_time)
+            db_result = db.insert_one_behavior(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), msg_notify_time)
             # if user behavior collecting failed, no need to stop the program
             # here it should be log files, but for simplicity, just use print
             if (db_result.get('ResponseMetadata').get('HTTPStatusCode') != 200):

@@ -118,6 +118,7 @@ def on_time_schedule_received(topic, payload, dup, qos, retain, **kwargs):
     # recording user's behavior thread
     usr_thread_stop_event = threading.Event()
     usr_thread = threading.Thread(target=user_behavior.listen_on_bed_time, kwargs={'sleep_at_time': sleep_at_time,
+                                                                                   'msg_notify_time': msg_notify_time,
                                                                                    'to_phone_number': to_phone_number,
                                                                                    'stop_event': usr_thread_stop_event})
     USER_THREADS[id] = (usr_thread, usr_thread_stop_event)
