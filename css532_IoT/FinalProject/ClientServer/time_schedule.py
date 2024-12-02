@@ -17,7 +17,7 @@ class time_schedule:
         # calculating message notification time
         time_shift = 3600
         if len(user_behaviors) > 0:
-            time_shift += self.get_80_percentile_time(user_behaviors)
+            time_shift = self.get_80_percentile_time(user_behaviors)
 
         self.msg_notify_time = self.sleep_at_time - timedelta(seconds=time_shift)
 
@@ -26,9 +26,9 @@ class time_schedule:
         time_format = "%Y-%m-%d %H:%M:%S"
         for user_behavior in user_behaviors:
             #time_str = "2024-11-24 10:30:00"
-            ideal_time = user_behavior.get('IDEAL_TIME')
+            notify_time = user_behavior.get('NOTIFY_TIME')
             real_time = user_behavior.get('REAL_TIME')
-            time_shift = datetime.strptime(real_time, time_format) - datetime.strptime(ideal_time, time_format)
+            time_shift = datetime.strptime(real_time, time_format) - datetime.strptime(notify_time, time_format)
             time_shifts.append(time_shift.total_seconds())
         time_shifts.sort()
         percentile_80 = np.percentile(time_shifts, 80)
