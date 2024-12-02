@@ -34,6 +34,6 @@ How to run code:
 ## Database Setup
 Tables:
 1. ALARMS (ID(String)---DATE---PHONE---PREFER_SLEEP_TIME---TIME)
-2.BEHAVIORS (REAL_TIME (String)---NOTIFY_TIME)
+2. BEHAVIORS (REAL_TIME (String)---NOTIFY_TIME)
 
 Install AWS CLI and set AWS account credencials. Prefer using AWS role attached with database access policy
