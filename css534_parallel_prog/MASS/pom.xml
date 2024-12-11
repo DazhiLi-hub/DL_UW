@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+
+	<name>Aritulation Point Finder</name>
+	<description>Agent-based articulation point program</description>
+    <groupId>edu.uw.bothell.css.mass.apps</groupId>
+    <artifactId>AP</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0.0-RELEASE</version>
+
+	<parent>
+		<groupId>edu.uw.bothell.css.dsl.mass</groupId>
+		<artifactId>Graphs</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <archive>
+                                <manifest>
+                                    <mainClass>edu.uw.bothell.css.dsl.appl.graphs.AP.AP</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

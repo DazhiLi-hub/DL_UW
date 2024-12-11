@@ -1,0 +1,2 @@
+15:20:59.298 [main] [DEBUG] MASS: reading machine file: nodes.xml
+15:20:59.301 [main] [DEBUG] machine file: nodes.xml does not exist or is not readable.
